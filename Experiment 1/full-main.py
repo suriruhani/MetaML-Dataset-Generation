@@ -19,27 +19,18 @@ style.use('fivethirtyeight')
 from sklearn.model_selection import cross_validate
 import scipy.stats as sps
 
-spect_train = pd.read_csv("Dataset/SPECT.train", sep= ',', header= None)
-spect_test = pd.read_csv("Dataset/SPECT.test", sep= ',', header= None)
-spect = pd.read_csv("Dataset/SPECT.test", sep= ',', header= None)
+dataset = pd.read_csv("Dataset/balance-scale.data", sep= ',', header= None)
 
-X_train = spect_train.values[:, 1:22]
-y_train = spect_train.values[:,0]
-
-X_test = spect_test.values[:, 1:22]
-y_test = spect_test.values[:,0]
-
-X_all = np.concatenate((X_train, X_test), axis=0)
-y_all = np.concatenate((y_train, y_test), axis=0)
+X = dataset.values[:, 1:5]
+y = dataset.values[:, 0]
 
 # dataset structure:
-# Y, X1......X22  weight, fold_1....fold_10
-# 0, 1........22,  23, 24......,33,
+# Y, X1, X2, X3, X4  weight, fold_1....fold_10
+# 0,  1, 2, 3,   4,    5,     6, ..... 15
 # weight = 1 at start, doubled for every wrong classification
 # fold_i = x where x is number of times the instance is included in ith fold
 
 num_boost = 10
-dataset = np.concatenate((spect_train, spect_test), axis=0)
 size = len(dataset)
 fold_size = floor(size/num_boost)
 
@@ -65,25 +56,25 @@ def binary_search(arr, comp):
 
 for k in range(num_boost): # number of reweighing
     print(f'-----------PASS {k+1}-----------')
-    for i in range(22+2, 22+2+num_boost): # number of resampling
-        weights_now = np.cumsum(dataset[:, 23]/np.sum(dataset[:, 23]),axis=0)
+    for i in range(6, 15): # number of resampling
+        weights_now = np.cumsum(dataset[:, 5]/np.sum(dataset[:, 5]),axis=0)
         for _ in range(fold_size):
             roll = random()
             index = binary_search(weights_now, roll)
             dataset[:, i][index] += 1
 
-    for i in range(22+2, 22+2+num_boost): # number of resampling
-        fold = dataset[dataset[:,i] > 0][:,range(24)]
+    for i in range(6, 15): # number of resampling
+        fold = dataset[dataset[:,i] > 0][:,range(6)]
         X_train = []
         y_train = []
         for row in fold:
-            X_train.extend([row[1:23]]*row[23])
+            X_train.extend([row[1:5]]*row[5])
             # include it as many times as the weight
-            y_train.extend([row[0]]*row[23])
+            y_train.extend([row[0]]*row[5])
         model = tree.DecisionTreeClassifier()
         model = model.fit(X_train, y_train)
         # test on full dataset
-        X_test = dataset[:, 1:23]
+        X_test = dataset[:, 1:5]
         y_test = dataset[:, 0]
         prediction = model.predict(X_test)
         print(accuracy_score(y_test, prediction)*100, "%")
@@ -94,4 +85,4 @@ for k in range(num_boost): # number of reweighing
             # check for score by matching y label to prediction
             score = 1 if (pred == dataset[j][0]) else 0
             if (score == 0):
-                dataset[j][23] *= 2 # double weight if misclassified
+                dataset[j][5] *= 2 # double weight if misclassified
