@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score
 from sklearn import tree
 from matplotlib import style
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 style.use('fivethirtyeight')
 
 def binary_search(arr, comp):
@@ -116,7 +117,7 @@ def main(path, sep, num_attr):
             prediction = model.predict(X_test)
 
             # knn helper
-            hepler_model = KNeighborsClassifier(n_neighbors=1)
+            hepler_model = GaussianNB()
             hepler_model.fit(X_train, y_train)
             helper_prediction = hepler_model.predict(X_test)
 
