@@ -36,6 +36,9 @@ def main(path, sep, num_attr):
     # id, Y, X(1)......X(num_attr),  weight
     # 0,  1,  2........num_attr+1,  num_attr+2
 
+    zero_frac = 55/(212+55)
+    one_frac = 212/(212+55)
+
     number_of_pass = 10
     fold_per_boost = 10
     size = len(dataset)
@@ -121,10 +124,16 @@ def main(path, sep, num_attr):
                 pred = prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
+                is_zero = True if dataset[int(id)][1] == 0 else False
                 if (score == 0):
                     miss += 1
-                    dataset[int(id)][num_attr+2] *= 2
-                    # double weight if misclassified
+                    if is_zero:
+                        factor = 2 * one_frac
+                    else:
+                        factor = 2 * zero_frac
+
+                    dataset[int(id)][num_attr+2] *= factor
+
             print(accuracy_score(y_test, prediction)*100, "%")
 
 main("Dataset/SPECT.test", ",", 22)
