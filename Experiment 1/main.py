@@ -21,6 +21,9 @@ def binary_search(arr, comp):
         mid = floor((high + low)/2)
     return mid
 
+def flatten_2d_list(ini_list):
+    return [j for sub in ini_list for j in sub]
+
 def main(path, sep, num_attr):
 
     dataset = pd.read_csv(path, sep=sep, header=None)
@@ -44,8 +47,6 @@ def main(path, sep, num_attr):
 
     weights = np.ones((size,1), dtype=int) # add weights
     dataset = np.append(dataset, weights, axis=1)
-    print(dataset)
-    # past_ids = []
 
     for k in range(number_of_pass): # number of resampling
         # form this pass dataset
@@ -61,11 +62,12 @@ def main(path, sep, num_attr):
         else: # use entire dataset for first pass
             dataset_now = dataset
 
-        with open(f"dataset_pass{k+1}.txt", 'w') as f:
-            for row in dataset_now:
-                f.write('%s\n' % row)
+        # uncomment for printing each dataset
+        # with open(f"dataset_pass{k+1}.txt", 'w') as f:
+        #     for row in dataset_now:
+        #         f.write('%s\n' % row)
         # make folds and train, test
-        fold_size = floor(size/fold_per_boost)
+
         class1 = []
         class0 = []
         for r in dataset_now:
@@ -93,18 +95,17 @@ def main(path, sep, num_attr):
 
         for f in range(fold_per_boost):
             # print(f'Fold {f+1}')
-            test = dataset_now[fold_size*f:fold_size*(f+1)]
+            test = strat_folds[f]
             X_test = [row[2:num_attr+2] for row in test]
             y_test = list(zip(*test))[1]
-
             id_test = list(zip(*test))[0]
 
             if (f == 0):
-                train = dataset_now[fold_size*(f+1):]
+                train = flatten_2d_list(strat_folds[1:])
             elif (f == fold_per_boost-1):
-                train = dataset_now[:fold_size*(f-1)]
+                train = flatten_2d_list(strat_folds[:f-1])
             else:
-                train = np.concatenate((dataset_now[:fold_size*(f)], dataset_now[fold_size*(f+1):]), axis=0)
+                train = np.concatenate((flatten_2d_list(strat_folds[:f]), flatten_2d_list(strat_folds[f+1:])), axis=0)
 
             X_train = [row[2:num_attr+2] for row in train]
             y_train = list(zip(*train))[1]
