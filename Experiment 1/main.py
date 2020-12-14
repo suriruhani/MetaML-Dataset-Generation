@@ -5,6 +5,7 @@ from random import random
 from sklearn.metrics import accuracy_score
 from sklearn import tree
 from matplotlib import style
+from sklearn.neighbors import KNeighborsClassifier
 style.use('fivethirtyeight')
 
 def binary_search(arr, comp):
@@ -33,11 +34,9 @@ def main(path, sep, num_attr):
     # dataset[10] = dataset[1]
     # dataset[1] = temp
     # print(dataset)
+
     # id, Y, X(1)......X(num_attr),  weight
     # 0,  1,  2........num_attr+1,  num_attr+2
-
-    zero_frac = 55/(212+55)
-    one_frac = 212/(212+55)
 
     number_of_pass = 10
     fold_per_boost = 10
@@ -45,8 +44,6 @@ def main(path, sep, num_attr):
     id = [[x] for x in range(size)]
     dataset = np.append(id, dataset, axis=1)
     # dataset[:,[1,23]] = dataset[:,[23,1]]
-    # print(dataset)
-    # return
 
     weights = np.ones((size,1), dtype=int) # add weights
     dataset = np.append(dataset, weights, axis=1)
@@ -65,7 +62,7 @@ def main(path, sep, num_attr):
         else: # use entire dataset for first pass
             dataset_now = dataset
 
-        # uncomment for printing each dataset
+        # uncomment for printing each dataset on file
         # with open(f"dataset_pass{k+1}.txt", 'w') as f:
         #     for row in dataset_now:
         #         f.write('%s\n' % row)
@@ -113,18 +110,24 @@ def main(path, sep, num_attr):
             X_train = [row[2:num_attr+2] for row in train]
             y_train = list(zip(*train))[1]
 
+            # DT main
             model = tree.DecisionTreeClassifier()
             model = model.fit(X_train, y_train)
             prediction = model.predict(X_test)
+
+            # knn helper
+            hepler_model = KNeighborsClassifier(n_neighbors=1)
+            hepler_model.fit(X_train, y_train)
+            helper_prediction = hepler_model.predict(X_test)
+
             # prediction = 1 for class 1, 0 for class 0, -1 for not in this fold
             # score = 1 for correct classification, 0 for misclassification, -1 for not in this fold
-            total = len(id_test)
             miss = 0
             wrong_zero = wrong_one = zero = one = 0
             wrong_zero_id = []
             wrong_one_id = []
             for i, id in enumerate(id_test):
-                pred = prediction[i] # store prediction for this run
+                pred = helper_prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
                 is_zero = True if dataset[int(id)][1] == 0 else False
@@ -145,10 +148,10 @@ def main(path, sep, num_attr):
                         wrong_one_id.append(id)
 
             for id in wrong_zero_id:
-                dataset[int(id)][num_attr+2] *= 2 * (1+wrong_zero/zero)
+                dataset[int(id)][num_attr+2] *= 2
 
             for id in wrong_one_id:
-                dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
+                dataset[int(id)][num_attr+2] *= 2
 
             print(accuracy_score(y_test, prediction)*100, "%")
 
