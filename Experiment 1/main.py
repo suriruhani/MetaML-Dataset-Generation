@@ -24,15 +24,24 @@ def binary_search(arr, comp):
 def flatten_2d_list(ini_list):
     return [j for sub in ini_list for j in sub]
 
-def main(path, sep, num_attr):
+def main(path, sep, is_last):
 
     dataset = pd.read_csv(path, sep=sep, header=None)
+    num_attr = len(dataset.columns) - 1
+    print(num_attr)
+
+    if is_last:
+        dataset = dataset.reindex([num_attr] + [x for x in range(num_attr)], axis=1)
+        dataset.columns = range(num_attr+1)
+
     # del dataset[0]
     # print(dataset)
+
     # temp = dataset.copy()[10]
     # dataset[10] = dataset[1]
     # dataset[1] = temp
     # print(dataset)
+
     # id, Y, X(1)......X(num_attr),  weight
     # 0,  1,  2........num_attr+1,  num_attr+2
 
@@ -152,5 +161,5 @@ def main(path, sep, num_attr):
 
             print(accuracy_score(y_test, prediction)*100, "%")
 
-main("Dataset/SPECT.test", ",", 22)
+main("Dataset/ECOC/0.txt", ",", True)
 
