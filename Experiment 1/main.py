@@ -1,10 +1,12 @@
 import numpy as np
-from math import floor
 import pandas as pd
 from random import random
 from sklearn.metrics import accuracy_score
 from sklearn import tree
 from matplotlib import style
+import _thread
+import threading
+import time
 style.use('fivethirtyeight')
 
 def binary_search(arr, comp):
@@ -12,13 +14,17 @@ def binary_search(arr, comp):
         return 0
     low = 0
     high = len(arr) - 1
-    mid = floor((high + low)/2)
+    mid = ((high + low)//2)
     while not (comp > arr[mid-1] and comp <= arr[mid]):
         if comp <= arr[mid-1]:
             high = mid - 1
+            if high <= 0:
+                return 0
         else:
             low = mid + 1
-        mid = floor((high + low)/2)
+            if low >= len(arr) - 1:
+                return len(arr) - 1
+        mid = ((high + low)//2)
     return mid
 
 def flatten_2d_list(ini_list):
@@ -26,50 +32,38 @@ def flatten_2d_list(ini_list):
 
 def main(path, sep, is_last):
 
+    # id, Y, X(1)......X(num_attr),  weight
+    # 0,  1,  2........num_attr+1,  num_attr+2
+
     dataset = pd.read_csv(path, sep=sep, header=None)
     num_attr = len(dataset.columns) - 1
-    print(num_attr)
 
     if is_last:
         dataset = dataset.reindex([num_attr] + [x for x in range(num_attr)], axis=1)
         dataset.columns = range(num_attr+1)
 
-    # del dataset[0]
-    # print(dataset)
-
-    # temp = dataset.copy()[10]
-    # dataset[10] = dataset[1]
-    # dataset[1] = temp
-    # print(dataset)
-
-    # id, Y, X(1)......X(num_attr),  weight
-    # 0,  1,  2........num_attr+1,  num_attr+2
-
-    zero_frac = 55/(212+55)
-    one_frac = 212/(212+55)
+    filename = path.split("/")[-1]
+    file = open("policy_3_results/"+filename, 'w')
 
     number_of_pass = 10
     fold_per_boost = 10
     size = len(dataset)
     id = [[x] for x in range(size)]
     dataset = np.append(id, dataset, axis=1)
-    # dataset[:,[1,23]] = dataset[:,[23,1]]
-    # print(dataset)
-    # return
 
     weights = np.ones((size,1), dtype=int) # add weights
     dataset = np.append(dataset, weights, axis=1)
 
     for k in range(number_of_pass): # number of resampling
         # form this pass dataset
-        print(f'-----------PASS {k+1}-----------')
+        file.write(f'-----------PASS {k+1}-----------\n')
         if (k != 0): # resample from second pass onwards
             dataset_now = []
-            weights_now = np.cumsum(dataset[:, num_attr+2]/np.sum(dataset[:, num_attr+2]), axis=0)
-            # print(weights_now)
-            for _ in range(size):
+            weights_now = np.cumsum(dataset[:, num_attr+2]/np.sum(dataset[:, num_attr+2]), axis=0).tolist()
+            for test in range(size):
                 roll = random()
                 index = binary_search(weights_now, roll)
+                # print(test)
                 dataset_now.append(dataset[index])
         else: # use entire dataset for first pass
             dataset_now = dataset
@@ -78,6 +72,7 @@ def main(path, sep, is_last):
         # with open(f"dataset_pass{k+1}.txt", 'w') as f:
         #     for row in dataset_now:
         #         f.write('%s\n' % row)
+
         # make folds and train, test
 
         class1 = []
@@ -87,7 +82,7 @@ def main(path, sep, is_last):
                 class1.append(r)
             elif r[1] == 0:
                 class0.append(r)
-        print("class length 0 & 1:", len(class0), len(class1))
+        file.write("class length 0 & 1:" + str(len(class0)) + " " + str(len(class1)) + "\n")
 
         strat_folds = [[] for _ in range(fold_per_boost)]
 
@@ -106,7 +101,6 @@ def main(path, sep, is_last):
                 count_fold = 0
 
         for f in range(fold_per_boost):
-            # print(f'Fold {f+1}')
             test = strat_folds[f]
             X_test = [row[2:num_attr+2] for row in test]
             y_test = list(zip(*test))[1]
@@ -127,7 +121,6 @@ def main(path, sep, is_last):
             prediction = model.predict(X_test)
             # prediction = 1 for class 1, 0 for class 0, -1 for not in this fold
             # score = 1 for correct classification, 0 for misclassification, -1 for not in this fold
-            total = len(id_test)
             miss = 0
             wrong_zero = wrong_one = zero = one = 0
             wrong_zero_id = []
@@ -145,11 +138,9 @@ def main(path, sep, is_last):
                 if (score == 0):
                     miss += 1
                     if is_zero:
-                        # factor = 2 * one_frac
                         wrong_zero += 1
                         wrong_zero_id.append(id)
                     else:
-                        # factor = 2 * zero_frac
                         wrong_one += 1
                         wrong_one_id.append(id)
 
@@ -159,7 +150,11 @@ def main(path, sep, is_last):
             for id in wrong_one_id:
                 dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
 
-            print(accuracy_score(y_test, prediction)*100, "%")
+            file.write(str(accuracy_score(y_test, prediction)*100) + " %\n")
 
-main("Dataset/ECOC/0.txt", ",", True)
+    file.close()
+
+for i in range(21):
+    main(f"Dataset/ECOC/{i}.txt", ",", True)
+
 
