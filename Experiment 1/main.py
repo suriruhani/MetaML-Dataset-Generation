@@ -43,7 +43,7 @@ def main(path, sep, is_last):
         dataset.columns = range(num_attr+1)
 
     filename = path.split("/")[-1]
-    file = open("policy_3_results/"+filename, 'w')
+    file = open("Results/Policy_3/"+filename, 'w')
 
     number_of_pass = 10
     fold_per_boost = 10
@@ -54,6 +54,8 @@ def main(path, sep, is_last):
     weights = np.ones((size,1), dtype=int) # add weights
     dataset = np.append(dataset, weights, axis=1)
 
+    y_values = [] # for r squared calculation
+
     for k in range(number_of_pass): # number of resampling
         # form this pass dataset
         file.write(f'-----------PASS {k+1}-----------\n')
@@ -63,7 +65,6 @@ def main(path, sep, is_last):
             for test in range(size):
                 roll = random()
                 index = binary_search(weights_now, roll)
-                # print(test)
                 dataset_now.append(dataset[index])
         else: # use entire dataset for first pass
             dataset_now = dataset
@@ -74,7 +75,6 @@ def main(path, sep, is_last):
         #         f.write('%s\n' % row)
 
         # make folds and train, test
-
         class1 = []
         class0 = []
         for r in dataset_now:
@@ -99,6 +99,8 @@ def main(path, sep, is_last):
             count_fold += 1
             if count_fold == fold_per_boost:
                 count_fold = 0
+
+        accuracy_sum = 0
 
         for f in range(fold_per_boost):
             test = strat_folds[f]
@@ -150,11 +152,21 @@ def main(path, sep, is_last):
             for id in wrong_one_id:
                 dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
 
-            file.write(str(accuracy_score(y_test, prediction)*100) + " %\n")
+            accuracy_value = accuracy_score(y_test, prediction)*100
+            accuracy_sum += accuracy_value
+            file.write(str(accuracy_value) + " %\n")
+
+        y_values.append(accuracy_sum/fold_per_boost)
 
     file.close()
 
-for i in range(21):
+    x_values = range(1,1+number_of_pass)
+    correlation_matrix = np.corrcoef(x_values, y_values)
+    correlation_xy = correlation_matrix[0,1]
+    r_squared = correlation_xy**2
+    print(r_squared)
+
+for i in range(41):
     main(f"Dataset/ECOC/{i}.txt", ",", True)
 
 
