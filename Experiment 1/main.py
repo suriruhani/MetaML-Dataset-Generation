@@ -166,10 +166,10 @@ def main(path, sep, is_last):
                         wrong_one_id.append(id)
 
             for id in wrong_zero_id:
-                dataset[int(id)][num_attr+2] *= 2 * (1+wrong_zero/zero)
+                dataset[int(id)][num_attr+2] *= (1+wrong_zero/zero)
 
             for id in wrong_one_id:
-                dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
+                dataset[int(id)][num_attr+2] *= (1+wrong_one/one)
 
             accuracy_value = accuracy_score(y_test, prediction)*100
             accuracy_sum += accuracy_value
