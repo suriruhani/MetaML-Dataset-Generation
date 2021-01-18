@@ -61,11 +61,31 @@ def main(path, sep, is_last):
         file.write(f'-----------PASS {k+1}-----------\n')
         if (k != 0): # resample from second pass onwards
             dataset_now = []
-            weights_now = np.cumsum(dataset[:, num_attr+2]/np.sum(dataset[:, num_attr+2]), axis=0).tolist()
-            for test in range(size):
+
+            class1 = []
+            class0 = []
+            for r in dataset:
+                if r[1] == 1:
+                    class1.append(r)
+                elif r[1] == 0:
+                    class0.append(r)
+
+            size_of_0 = len(dataset)//2
+            size_of_1 = len(dataset) - size_of_0
+
+            weights_of_0 = np.cumsum(list(zip(*class0))[num_attr+2]/np.sum(list(zip(*class0))[num_attr+2]), axis=0)
+            weights_of_1 = np.cumsum(list(zip(*class1))[num_attr+2]/np.sum(list(zip(*class1))[num_attr+2]), axis=0)
+
+            for _ in range(size_of_0):
                 roll = random()
-                index = binary_search(weights_now, roll)
-                dataset_now.append(dataset[index])
+                index = binary_search(weights_of_0, roll)
+                dataset_now.append(class0[index])
+
+            for _ in range(size_of_1):
+                roll = random()
+                index = binary_search(weights_of_1, roll)
+                dataset_now.append(class1[index])
+
         else: # use entire dataset for first pass
             dataset_now = dataset
 
@@ -83,7 +103,6 @@ def main(path, sep, is_last):
             elif r[1] == 0:
                 class0.append(r)
         file.write("class length 0 & 1:" + str(len(class0)) + " " + str(len(class1)) + "\n")
-
         strat_folds = [[] for _ in range(fold_per_boost)]
 
         count_fold = 0
