@@ -142,34 +142,14 @@ def main(path, sep, is_last):
             prediction = model.predict(X_test)
             # prediction = 1 for class 1, 0 for class 0, -1 for not in this fold
             # score = 1 for correct classification, 0 for misclassification, -1 for not in this fold
-            miss = 0
-            wrong_zero = wrong_one = zero = one = 0
-            wrong_zero_id = []
-            wrong_one_id = []
+
             for i, id in enumerate(id_test):
                 pred = prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
-                is_zero = True if dataset[int(id)][1] == 0 else False
-                if is_zero:
-                    zero += 1
-                else:
-                    one += 1
 
                 if (score == 0):
-                    miss += 1
-                    if is_zero:
-                        wrong_zero += 1
-                        wrong_zero_id.append(id)
-                    else:
-                        wrong_one += 1
-                        wrong_one_id.append(id)
-
-            for id in wrong_zero_id:
-                dataset[int(id)][num_attr+2] *= 2 * (1+wrong_zero/zero)
-
-            for id in wrong_one_id:
-                dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
+                    dataset[int(id)][num_attr+2] *= 2
 
             accuracy_value = accuracy_score(y_test, prediction)*100
             accuracy_sum += accuracy_value
