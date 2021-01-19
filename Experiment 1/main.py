@@ -4,9 +4,7 @@ from random import random
 from sklearn.metrics import accuracy_score
 from sklearn import tree
 from matplotlib import style
-import _thread
-import threading
-import time
+from sklearn.naive_bayes import GaussianNB
 style.use('fivethirtyeight')
 
 def binary_search(arr, comp):
@@ -43,7 +41,7 @@ def main(path, sep, is_last):
         dataset.columns = range(num_attr+1)
 
     filename = path.split("/")[-1]
-    file = open("Results/Policy_3/"+filename, 'w')
+    file = open("Results/"+filename, 'w')
 
     number_of_pass = 10
     fold_per_boost = 10
@@ -140,11 +138,17 @@ def main(path, sep, is_last):
             model = tree.DecisionTreeClassifier()
             model = model.fit(X_train, y_train)
             prediction = model.predict(X_test)
+
+            # knn helper
+            hepler_model = GaussianNB()
+            hepler_model.fit(X_train, y_train)
+            helper_prediction = hepler_model.predict(X_test)
+
             # prediction = 1 for class 1, 0 for class 0, -1 for not in this fold
             # score = 1 for correct classification, 0 for misclassification, -1 for not in this fold
 
             for i, id in enumerate(id_test):
-                pred = prediction[i] # store prediction for this run
+                pred = helper_prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
 
