@@ -161,15 +161,15 @@ def main(path, sep, is_last):
 
         y_values.append(accuracy_sum/fold_per_boost)
 
-    file.close()
-
     x_values = range(1,1+number_of_pass)
     correlation_matrix = np.corrcoef(x_values, y_values)
     correlation_xy = correlation_matrix[0,1]
     r_squared = correlation_xy**2
     print(r_squared)
+    file.write("Overall dataset R square: " + str(r_squared) + " %\n")
+    file.close()
 
-for i in range(41):
+for i in range(1):
     main(f"Dataset/ECOC/{i}.txt", ",", True)
 
 
