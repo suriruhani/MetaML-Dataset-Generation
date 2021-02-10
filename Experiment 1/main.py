@@ -1,6 +1,8 @@
 import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use('seaborn-whitegrid')
 import pandas as pd
-from random import random
+from random import random, randint
 from sklearn.metrics import accuracy_score
 from sklearn import tree
 from matplotlib import style
@@ -28,6 +30,9 @@ def binary_search(arr, comp):
 def flatten_2d_list(ini_list):
     return [j for sub in ini_list for j in sub]
 
+attr_list = []
+instance_list = []
+
 def main(path, sep, is_last):
 
     # id, Y, X(1)......X(num_attr),  weight
@@ -40,6 +45,10 @@ def main(path, sep, is_last):
         dataset = dataset.reindex([num_attr] + [x for x in range(num_attr)], axis=1)
         dataset.columns = range(num_attr+1)
 
+    print(num_attr, len(dataset))
+    attr_list.append(num_attr)
+    instance_list.append(len(dataset))
+    return
     filename = path.split("/")[-1]
     file = open("Results/"+filename, 'w')
 
@@ -169,7 +178,45 @@ def main(path, sep, is_last):
     file.write("Overall dataset R square: " + str(r_squared) + " %\n")
     file.close()
 
-for i in range(1):
-    main(f"Dataset/ECOC/{i}.txt", ",", True)
+chosen_datasets = []
+valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
+                  # + list(range(23420, 26882)) + list(range(27392, 27510)) + list(range(28533, 28658)))
+
+all_instance_list = []
+
+# while len(chosen_datasets) < 100:
+for i in valid_datasets:
+    val = randint(0,len(valid_datasets))
+    try:
+        # path = "/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/"+str(valid_datasets[val])+".txt"
+        path = "/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/"+str(i)+".txt"
+        dataset = pd.read_csv(path, sep=",", header=None)
+    except:
+        print("fail")
+        pass
+    else:
+        # if (len(dataset.columns) - 1 <= 20 and len(dataset) <= 1000):
+        #     chosen_datasets.append(valid_datasets.pop(val))
+        #     print("added " + str(len(chosen_datasets)))
+        all_instance_list.append(len(dataset))
+        print("added!")
+        # else:
+        #     print("pass")
+
+# print(os.path.dirname(os.path.abspath(__file__)))
+# for i in chosen_datasets:
+#     print(i)
+#     # main(f"/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/{i}.txt", ",", True)
+#     main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/{i}.txt", ",", True)
+x = list(range(1, len(all_instance_list)+1))
+plt.plot(x, all_instance_list, 'o', color='black')
+plt.show()
+# print(attr_list)
+# plt.plot(attr_list, y, 'o', color='black')
+# plt.show()
+# print(instance_list)
+# plt.plot(instance_list, y, 'o', color='black')
+# plt.show()
+
 
 
