@@ -28,14 +28,12 @@ def binary_search(arr, comp):
 def flatten_2d_list(ini_list):
     return [j for sub in ini_list for j in sub]
 
-def policy_1a(dataset, id, w_col):
-    dataset[id][w_col] *= 2
+def policy_1a(dataset, id, w_col, factor):
+    dataset[id][w_col] *= factor
 
 def policy_1b(dataset, id, w_col):
     dataset[id][w_col] += 1
 
-def policy_1c(dataset, id, w_col):
-    dataset[id][w_col] *= 1.5
 
 def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
 
@@ -180,13 +178,31 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
             # prediction = 1 for class 1, 0 for class 0, -1 for not in this fold
             # score = 1 for correct classification, 0 for misclassification, -1 for not in this fold
 
+            wrong_zero = wrong_one = zero = one = 0
+            wrong_zero_id = []
+            wrong_one_id = []
+
             for i, id in enumerate(id_test):
-                pred = helper_prediction[i] # store prediction for this run
+                pred = prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
+                is_zero = True if dataset[int(id)][1] == 0 else False
+                if is_zero:
+                    zero += 1
+                    if (score == 0):
+                        wrong_zero += 1
+                        wrong_zero_id.append(id)
+                else:
+                    one += 1
+                    if (score == 0):
+                        wrong_one += 1
+                        wrong_one_id.append(id)
 
-                if (score == 0):
-                    policy_1a(dataset, int(id), num_attr+2)
+                for id in wrong_zero_id:
+                    policy_1a(dataset, int(id), num_attr+2, 2 * (1+wrong_zero/zero))
+
+                for id in wrong_one_id:
+                    dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
 
             accuracy_value = accuracy_score(y_test, prediction)*100
             accuracy_sum += accuracy_value
@@ -252,7 +268,7 @@ while len(chosen_datasets) < 100 and len(valid_datasets) > 0:
 
 policy_sum = 0
 valid = 0
-overall = open("Results/1a_Overall.txt", 'a')
+overall = open("Results/3_Overall.txt", 'a')
 r2_file = open("Results/R2_Overall.txt", 'a')
 acc_file = open("Results/Acc_Overall.txt", 'a')
 rep_file = open("Results/Rep_Overall.txt", 'a')
