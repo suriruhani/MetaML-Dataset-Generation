@@ -5,6 +5,7 @@ from sklearn.metrics import accuracy_score
 from sklearn import tree
 from sklearn.neighbors import KNeighborsClassifier
 from math import isnan
+from sklearn.naive_bayes import GaussianNB
 
 def binary_search(arr, comp):
     if comp < arr[0]:
@@ -36,7 +37,7 @@ def policy_1b(dataset, id, w_col):
 def policy_1c(dataset, id, w_col):
     dataset[id][w_col] *= 1.5
 
-def main(path, sep, is_last, policy_file):
+def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
 
     # id, Y, X(1)......X(num_attr),  weight
     # 0,  1,  2........num_attr+1,  num_attr+2
@@ -172,6 +173,7 @@ def main(path, sep, is_last, policy_file):
 
             # knn helper
             hepler_model = KNeighborsClassifier(n_neighbors=1)
+            # hepler_model = GaussianNB()
             hepler_model.fit(X_train, y_train)
             helper_prediction = hepler_model.predict(X_test)
 
@@ -192,6 +194,7 @@ def main(path, sep, is_last, policy_file):
 
         iteration_accuracy = accuracy_sum/fold_per_boost
         y_values.append(iteration_accuracy)
+        file.write(f"-----{iteration_accuracy}%-----\n")
         if prev_acc != -1:
 
             rise += 1 if (iteration_accuracy > prev_acc) else 0
@@ -203,10 +206,23 @@ def main(path, sep, is_last, policy_file):
     correlation_xy = correlation_matrix[0,1]
     r_squared = correlation_xy**2
     print(r_squared)
+
+    unique_test = dataset_now[0]
+    dataset_set = len(np.unique(unique_test))
+    rep_percentage = (size - dataset_set)/size
+
     file.write("Overall dataset R square: " + str(r_squared) + "\n")
     file.write("Accuracy increase ratio: " + str(rise/total_gradient) + "\n")
+    file.write("Repeatition percentage: " + str(rep_percentage) + "\n")
     file.close()
-    policy_file.write(filename + " : R^2 = " + str(r_squared) + " Rise ratio = " + str(rise/total_gradient) + "\n")
+
+    r2_file.write(str(r_squared) + "\n")
+    acc_file.write(str(rise/total_gradient) + "\n")
+    rep_file.write(str(rep_percentage) + "\n")
+
+    policy_file.write(filename + " : R^2 = " + str(r_squared) + " Rise ratio = "
+                      + str(rise/total_gradient) + " Unique % " + str(rep_percentage) + "\n")
+
     return r_squared
 
 chosen_datasets = []
@@ -216,7 +232,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-while len(chosen_datasets) < 10 and len(valid_datasets) > 0:
+while len(chosen_datasets) < 100 and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
         path = "/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/"+str(valid_datasets[val])+".txt"
@@ -237,11 +253,18 @@ while len(chosen_datasets) < 10 and len(valid_datasets) > 0:
 policy_sum = 0
 valid = 0
 overall = open("Results/1a_Overall.txt", 'a')
+r2_file = open("Results/R2_Overall.txt", 'a')
+acc_file = open("Results/Acc_Overall.txt", 'a')
+rep_file = open("Results/Rep_Overall.txt", 'a')
 overall.truncate(0)
+r2_file.truncate(0)
+acc_file.truncate(0)
+rep_file.truncate(0)
+
 for i in chosen_datasets:
     print("NOW TRYING --->", i)
     dataset_result = main(f"/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
-                          ",", True, overall)
+                          ",", True, overall, r2_file, acc_file, rep_file)
     # main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
     #                       ",", True, overall)
 
@@ -250,5 +273,8 @@ for i in chosen_datasets:
         valid+=1
 
 overall.close()
+r2_file.close()
+acc_file.close()
+rep_file.close()
 print("OVERALL ---->", policy_sum/valid)
 
