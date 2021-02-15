@@ -60,6 +60,15 @@ def main(path, sep, is_last, policy_file):
 
     y_values = [] # for r squared calculation
 
+    ratio_by_class = [0,0]
+    for r in dataset:
+        if r[1] == 1:
+            ratio_by_class[1] += 1
+        elif r[1] == 0:
+            ratio_by_class[0] += 1
+    ratio_by_class[1] /= size
+    ratio_by_class[0] /= size
+
     for k in range(number_of_pass): # number of resampling
         # form this pass dataset
         file.write(f'-----------PASS {k+1}-----------\n')
@@ -74,21 +83,44 @@ def main(path, sep, is_last, policy_file):
                 elif r[1] == 0:
                     class0.append(r)
 
-            size_of_0 = len(dataset)//2
-            size_of_1 = len(dataset) - size_of_0
+            # size_of_0 = len(dataset)//2
+            # size_of_1 = len(dataset) - size_of_0
+
+            weights_total = np.cumsum(list(zip(*dataset))[num_attr+2]/np.sum(list(zip(*dataset))[num_attr+2]), axis=0)
 
             weights_of_0 = np.cumsum(list(zip(*class0))[num_attr+2]/np.sum(list(zip(*class0))[num_attr+2]), axis=0)
             weights_of_1 = np.cumsum(list(zip(*class1))[num_attr+2]/np.sum(list(zip(*class1))[num_attr+2]), axis=0)
 
-            for _ in range(size_of_0):
+            current_ratio = [0,0]
+            class_allow = [True, True]
+            while len(dataset_now) < size:
                 roll = random()
-                index = binary_search(weights_of_0, roll)
-                dataset_now.append(class0[index])
+                index = binary_search(weights_total, roll)
+                class_of_this = dataset[index][1]
+                current_class_ratio = current_ratio[int(class_of_this)]/len(dataset_now) if current_ratio[int(class_of_this)]!= 0 else 0
+                idea_class_ratio = 0.5
+                # ratio of a class lower bounded by original ratio and upper bounded by 50%
+                if (current_class_ratio <= idea_class_ratio):
+                    dataset_now.append(dataset[index])
+                    current_ratio[int(class_of_this)] += 1
+                else:
+                    class_allow[int(class_of_this)] = False
+                    break
 
-            for _ in range(size_of_1):
+            while len(dataset_now) < size:
                 roll = random()
-                index = binary_search(weights_of_1, roll)
-                dataset_now.append(class1[index])
+                index = binary_search(weights_of_0, roll) if class_allow[0] else binary_search(weights_of_1, roll)
+                dataset_now.append(class0[index]) if class_allow[0] else dataset_now.append(class1[index])
+
+            # for _ in range(size_of_0):
+            #     roll = random()
+            #     index = binary_search(weights_of_0, roll)
+            #     dataset_now.append(class0[index])
+            #
+            # for _ in range(size_of_1):
+            #     roll = random()
+            #     index = binary_search(weights_of_1, roll)
+            #     dataset_now.append(class1[index])
 
         else: # use entire dataset for first pass
             dataset_now = dataset
@@ -184,7 +216,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-while len(chosen_datasets) < 100 and len(valid_datasets) > 0:
+while len(chosen_datasets) < 10 and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
         path = "/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/"+str(valid_datasets[val])+".txt"
@@ -204,17 +236,20 @@ while len(chosen_datasets) < 100 and len(valid_datasets) > 0:
 
 policy_sum = 0
 valid = 0
+overall = open("Results/1a_Overall.txt", 'a')
+overall.truncate(0)
 for i in chosen_datasets:
     print("NOW TRYING --->", i)
-    overall = open("Results/1a_Overall.txt", 'a')
-    overall.truncate(0)
     dataset_result = main(f"/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
                           ",", True, overall)
+    # main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
+    # ",", True, overall)
+
     if not isnan(dataset_result):
         policy_sum += dataset_result
         valid+=1
-    overall.close()
-    # main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/{i}.txt", ",", True)
+
+overall.close()
 print("OVERALL ---->", policy_sum/valid)
 # print(attr_list)
 # plt.plot(attr_list, y, 'o', color='black')
