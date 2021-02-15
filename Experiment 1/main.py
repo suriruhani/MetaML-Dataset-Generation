@@ -27,6 +27,15 @@ def binary_search(arr, comp):
 def flatten_2d_list(ini_list):
     return [j for sub in ini_list for j in sub]
 
+def policy_1a(dataset, id, w_col):
+    dataset[id][w_col] *= 2
+
+def policy_1b(dataset, id, w_col):
+    dataset[id][w_col] += 1
+
+def policy_1c(dataset, id, w_col):
+    dataset[id][w_col] *= 1.5
+
 def main(path, sep, is_last, policy_file):
 
     # id, Y, X(1)......X(num_attr),  weight
@@ -174,7 +183,7 @@ def main(path, sep, is_last, policy_file):
                 score = 1 if (pred == dataset[int(id)][1]) else 0
 
                 if (score == 0):
-                    dataset[int(id)][num_attr+2] *= 2
+                    policy_1a(dataset, int(id), num_attr+2)
 
             accuracy_value = accuracy_score(y_test, prediction)*100
             accuracy_sum += accuracy_value
@@ -198,13 +207,13 @@ def main(path, sep, is_last, policy_file):
     return r_squared
 
 chosen_datasets = []
-# datasets with less than 8 attributes originally
+# datasets with less than 8 classes originally
 valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                   # + list(range(23420, 26882)) + list(range(27392, 27510))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-while len(chosen_datasets) < 100 and len(valid_datasets) > 0:
+while len(chosen_datasets) < 10 and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
         path = "/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/"+str(valid_datasets[val])+".txt"
