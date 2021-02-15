@@ -172,8 +172,8 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
             prediction = model.predict(X_test)
 
             # knn helper
-            hepler_model = KNeighborsClassifier(n_neighbors=1)
-            # hepler_model = GaussianNB()
+            # hepler_model = KNeighborsClassifier(n_neighbors=1)
+            hepler_model = GaussianNB()
             hepler_model.fit(X_train, y_train)
             helper_prediction = hepler_model.predict(X_test)
 
