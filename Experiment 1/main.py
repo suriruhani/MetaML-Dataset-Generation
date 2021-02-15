@@ -27,9 +27,6 @@ def binary_search(arr, comp):
 def flatten_2d_list(ini_list):
     return [j for sub in ini_list for j in sub]
 
-# attr_list = []
-# instance_list = []
-
 def main(path, sep, is_last, policy_file):
 
     # id, Y, X(1)......X(num_attr),  weight
@@ -43,8 +40,6 @@ def main(path, sep, is_last, policy_file):
         dataset.columns = range(num_attr+1)
 
     # print("STATS --->", num_attr, len(dataset))
-    # attr_list.append(num_attr)
-    # instance_list.append(len(dataset))
 
     filename = path.split("/")[-1]
     file = open("Results/"+filename, 'w')
@@ -58,7 +53,12 @@ def main(path, sep, is_last, policy_file):
     weights = np.ones((size,1), dtype=int) # add weights
     dataset = np.append(dataset, weights, axis=1)
 
-    y_values = [] # for r squared calculation
+    y_values = []
+    # for r squared calculation
+
+    total_gradient = number_of_pass - 1
+    prev_acc = -1
+    rise = 0
 
     ratio_by_class = [0,0]
     for r in dataset:
@@ -83,8 +83,6 @@ def main(path, sep, is_last, policy_file):
                 elif r[1] == 0:
                     class0.append(r)
 
-            # size_of_0 = len(dataset)//2
-            # size_of_1 = len(dataset) - size_of_0
 
             weights_total = np.cumsum(list(zip(*dataset))[num_attr+2]/np.sum(list(zip(*dataset))[num_attr+2]), axis=0)
 
@@ -112,23 +110,8 @@ def main(path, sep, is_last, policy_file):
                 index = binary_search(weights_of_0, roll) if class_allow[0] else binary_search(weights_of_1, roll)
                 dataset_now.append(class0[index]) if class_allow[0] else dataset_now.append(class1[index])
 
-            # for _ in range(size_of_0):
-            #     roll = random()
-            #     index = binary_search(weights_of_0, roll)
-            #     dataset_now.append(class0[index])
-            #
-            # for _ in range(size_of_1):
-            #     roll = random()
-            #     index = binary_search(weights_of_1, roll)
-            #     dataset_now.append(class1[index])
-
         else: # use entire dataset for first pass
             dataset_now = dataset
-
-        # uncomment for printing each dataset
-        # with open(f"dataset_pass{k+1}.txt", 'w') as f:
-        #     for row in dataset_now:
-        #         f.write('%s\n' % row)
 
         # make folds and train, test
         class1 = []
@@ -197,7 +180,11 @@ def main(path, sep, is_last, policy_file):
             accuracy_sum += accuracy_value
             file.write(str(accuracy_value) + " %\n")
 
-        y_values.append(accuracy_sum/fold_per_boost)
+        iteration_accuracy = accuracy_sum/fold_per_boost
+        y_values.append(iteration_accuracy)
+        if prev_acc != -1:
+            rise += 1 if (iteration_accuracy > prev_acc) else 0
+            prev_acc = iteration_accuracy
 
     x_values = range(1,1+number_of_pass)
     correlation_matrix = np.corrcoef(x_values, y_values)
@@ -205,8 +192,9 @@ def main(path, sep, is_last, policy_file):
     r_squared = correlation_xy**2
     print(r_squared)
     file.write("Overall dataset R square: " + str(r_squared) + "\n")
+    file.write("Accuracy increase ratio: " + str(rise/total_gradient) + "\n")
     file.close()
-    policy_file.write(filename + " : " + str(r_squared) + "\n")
+    policy_file.write(filename + " : R^2 = " + str(r_squared) + " Rise ratio = " + str(rise/total_gradient) + "\n")
     return r_squared
 
 chosen_datasets = []
@@ -216,7 +204,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-while len(chosen_datasets) < 10 and len(valid_datasets) > 0:
+while len(chosen_datasets) < 100 and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
         path = "/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/"+str(valid_datasets[val])+".txt"
@@ -227,7 +215,7 @@ while len(chosen_datasets) < 10 and len(valid_datasets) > 0:
         valid_datasets.pop(val)
         pass
     else:
-        if (len(dataset.columns) - 1 <= 30 and len(dataset) <= 3000):
+        if (len(dataset.columns) - 1 <= 35 and len(dataset) <= 3500):
             chosen_datasets.append(valid_datasets.pop(val))
             print("added " + str(len(chosen_datasets)))
         else:
@@ -243,7 +231,7 @@ for i in chosen_datasets:
     dataset_result = main(f"/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
                           ",", True, overall)
     # main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
-    # ",", True, overall)
+    #                       ",", True, overall)
 
     if not isnan(dataset_result):
         policy_sum += dataset_result
@@ -251,12 +239,4 @@ for i in chosen_datasets:
 
 overall.close()
 print("OVERALL ---->", policy_sum/valid)
-# print(attr_list)
-# plt.plot(attr_list, y, 'o', color='black')
-# plt.show()
-# print(instance_list)
-# plt.plot(instance_list, y, 'o', color='black')
-# plt.show()
-
-
 
