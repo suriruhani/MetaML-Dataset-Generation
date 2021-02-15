@@ -70,6 +70,7 @@ def main(path, sep, is_last, policy_file):
     rise = 0
 
     ratio_by_class = [0,0]
+
     for r in dataset:
         if r[1] == 1:
             ratio_by_class[1] += 1
@@ -192,8 +193,10 @@ def main(path, sep, is_last, policy_file):
         iteration_accuracy = accuracy_sum/fold_per_boost
         y_values.append(iteration_accuracy)
         if prev_acc != -1:
+
             rise += 1 if (iteration_accuracy > prev_acc) else 0
-            prev_acc = iteration_accuracy
+
+        prev_acc = iteration_accuracy
 
     x_values = range(1,1+number_of_pass)
     correlation_matrix = np.corrcoef(x_values, y_values)
