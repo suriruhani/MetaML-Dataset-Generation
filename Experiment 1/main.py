@@ -52,7 +52,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
     filename = path.split("/")[-1]
     file = open("Results/"+filename, 'w')
 
-    number_of_tries = total_gradient = 30
+    number_of_tries = total_gradient = 10
     fold_per_boost = 10
     size = len(dataset)
     id = [[x] for x in range(size)]
@@ -261,7 +261,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-test_dataset_count = 10
+test_dataset_count = 30
 while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
@@ -273,7 +273,7 @@ while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
         valid_datasets.pop(val)
         pass
     else:
-        if (len(dataset.columns) - 1 <= 30 and len(dataset) <= 3000):
+        if (len(dataset.columns) - 1 <= 20 and len(dataset) <= 2000):
             chosen_datasets.append(valid_datasets.pop(val))
             print("added " + str(len(chosen_datasets)))
         else:
