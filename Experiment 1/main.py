@@ -178,31 +178,17 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
             # prediction = 1 for class 1, 0 for class 0, -1 for not in this fold
             # score = 1 for correct classification, 0 for misclassification, -1 for not in this fold
 
-            wrong_zero = wrong_one = zero = one = 0
-            wrong_zero_id = []
-            wrong_one_id = []
+            all_ids = list(zip(*dataset_now.copy()))[0]
 
             for i, id in enumerate(id_test):
                 pred = prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
-                is_zero = True if dataset[int(id)][1] == 0 else False
-                if is_zero:
-                    zero += 1
-                    if (score == 0):
-                        wrong_zero += 1
-                        wrong_zero_id.append(id)
-                else:
-                    one += 1
-                    if (score == 0):
-                        wrong_one += 1
-                        wrong_one_id.append(id)
 
-                for id in wrong_zero_id:
-                    policy_1a(dataset, int(id), num_attr+2, 2 * (1+wrong_zero/zero))
-
-                for id in wrong_one_id:
-                    dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
+                if (score == 0):
+                    frequency = all_ids.count((id))
+                    factor = 1 + (1/frequency)
+                    policy_1a(dataset, int(id), num_attr+2, factor)
 
             accuracy_value = accuracy_score(y_test, prediction)*100
             accuracy_sum += accuracy_value
@@ -226,8 +212,6 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
     unique_test = list(zip(*dataset_now.copy()))[0]
     dataset_set = len(np.unique(unique_test))
     rep_percentage = (size - dataset_set)/size
-    print(dataset_set, size)
-    print(rep_percentage)
 
     file.write("Overall dataset R square: " + str(r_squared) + "\n")
     file.write("Accuracy increase ratio: " + str(rise/total_gradient) + "\n")
@@ -262,7 +246,7 @@ while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
         valid_datasets.pop(val)
         pass
     else:
-        if (len(dataset.columns) - 1 <= 35 and len(dataset) <= 3500):
+        if (len(dataset.columns) - 1 <= 30 and len(dataset) <= 3000):
             chosen_datasets.append(valid_datasets.pop(val))
             print("added " + str(len(chosen_datasets)))
         else:
