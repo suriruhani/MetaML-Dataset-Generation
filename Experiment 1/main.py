@@ -196,7 +196,7 @@ def main(path, sep, is_last, policy_file, r2_file, acc_inc_file, acc_dec_file, a
         y_values.append(iteration_accuracy)
         file.write(f"-----{iteration_accuracy}%-----\n")
         if prev_acc != -1:
-            tolerance = 0.05 #5%
+            tolerance = 0.01 #1%
             rise += 1 if ((iteration_accuracy) > (1+tolerance)*(prev_acc)) else 0
             fall += 1 if ((iteration_accuracy) < (1-tolerance)*(prev_acc)) else 0
 
@@ -237,7 +237,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-test_dataset_count = 10
+test_dataset_count = 100
 while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
