@@ -35,7 +35,7 @@ def policy_1b(dataset, id, w_col):
     dataset[id][w_col] += 1
 
 
-def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
+def main(path, sep, is_last, policy_file, r2_file, acc_inc_file, acc_dec_file, acc_eq_file, rep_file):
 
     # id, Y, X(1)......X(num_attr),  weight
     # 0,  1,  2........num_attr+1,  num_attr+2
@@ -66,7 +66,7 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
 
     total_gradient = number_of_pass - 1
     prev_acc = -1
-    rise = 0
+    rise = fall = 0
 
     ratio_by_class = [0,0]
 
@@ -186,9 +186,7 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
                 score = 1 if (pred == dataset[int(id)][1]) else 0
 
                 if (score == 0):
-                    frequency = all_ids.count((id))
-                    factor = 1 + (1/frequency)
-                    policy_1a(dataset, int(id), num_attr+2, factor)
+                    policy_1a(dataset, int(id), num_attr+2, 2)
 
             accuracy_value = accuracy_score(y_test, prediction)*100
             accuracy_sum += accuracy_value
@@ -198,8 +196,9 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
         y_values.append(iteration_accuracy)
         file.write(f"-----{iteration_accuracy}%-----\n")
         if prev_acc != -1:
-
-            rise += 1 if (iteration_accuracy > prev_acc) else 0
+            tolerance = 0.05 #5%
+            rise += 1 if ((iteration_accuracy) > (1+tolerance)*(prev_acc)) else 0
+            fall += 1 if ((iteration_accuracy) < (1-tolerance)*(prev_acc)) else 0
 
         prev_acc = iteration_accuracy
 
@@ -215,11 +214,15 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
 
     file.write("Overall dataset R square: " + str(r_squared) + "\n")
     file.write("Accuracy increase ratio: " + str(rise/total_gradient) + "\n")
+    file.write("Accuracy decrease ratio: " + str(fall/total_gradient) + "\n")
+    file.write("Accuracy equal ratio: " + str((total_gradient-fall-rise)/total_gradient) + "\n")
     file.write("Repeatition percentage: " + str(rep_percentage) + "\n")
     file.close()
 
     r2_file.write(str(r_squared) + "\n")
-    acc_file.write(str(rise/total_gradient) + "\n")
+    acc_inc_file.write(str(rise/total_gradient) + "\n")
+    acc_dec_file.write(str(fall/total_gradient) + "\n")
+    acc_eq_file.write(str((total_gradient-fall-rise)/total_gradient) + "\n")
     rep_file.write(str(rep_percentage) + "\n")
 
     policy_file.write(filename + " : R^2 = " + str(r_squared) + " Rise ratio = "
@@ -234,7 +237,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-test_dataset_count = 100
+test_dataset_count = 10
 while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
@@ -257,17 +260,21 @@ policy_sum = 0
 valid = 0
 overall = open("Results/3_Overall.txt", 'a')
 r2_file = open("Results/R2_Overall.txt", 'a')
-acc_file = open("Results/Acc_Overall.txt", 'a')
+acc_inc_file = open("Results/Acc_Increase_Overall.txt", 'a')
+acc_dec_file = open("Results/Acc_Decrease_Overall.txt", 'a')
+acc_eq_file = open("Results/Acc_Equal_Overall.txt", 'a')
 rep_file = open("Results/Rep_Overall.txt", 'a')
 overall.truncate(0)
 r2_file.truncate(0)
-acc_file.truncate(0)
+acc_inc_file.truncate(0)
+acc_dec_file.truncate(0)
+acc_eq_file.truncate(0)
 rep_file.truncate(0)
 
 for i in chosen_datasets:
     print("NOW TRYING --->", i)
     dataset_result = main(f"/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/chosen/{i}.txt",
-                          ",", True, overall, r2_file, acc_file, rep_file)
+                          ",", True, overall, r2_file, acc_inc_file, acc_dec_file, acc_eq_file, rep_file)
     # main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/chosen/{i}.txt",
     #                       ",", True, overall)
 
@@ -277,7 +284,9 @@ for i in chosen_datasets:
 
 overall.close()
 r2_file.close()
-acc_file.close()
+acc_inc_file.close()
+acc_dec_file.close()
+acc_dec_file.close()
 rep_file.close()
 print("OVERALL ---->", policy_sum/valid)
 
