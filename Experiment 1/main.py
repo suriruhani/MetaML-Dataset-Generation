@@ -178,15 +178,39 @@ def main(path, sep, is_last, policy_file, r2_file, acc_inc_file, acc_dec_file, a
             # prediction = 1 for class 1, 0 for class 0, -1 for not in this fold
             # score = 1 for correct classification, 0 for misclassification, -1 for not in this fold
 
+            wrong_zero = wrong_one = zero = one = 0
+            wrong_zero_id = []
+            wrong_one_id = []
+
             all_ids = list(zip(*dataset_now.copy()))[0]
 
             for i, id in enumerate(id_test):
-                pred = helper_prediction[i] # store prediction for this run
+                # pred = helper_prediction[i]
+                pred = prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
+                is_zero = True if dataset[int(id)][1] == 0 else False
+                if is_zero:
+                    zero += 1
+                    if (score == 0):
+                        wrong_zero += 1
+                        wrong_zero_id.append(id)
+                else:
+                    one += 1
+                    if (score == 0):
+                        wrong_one += 1
+                        wrong_one_id.append(id)
 
-                if (score == 0):
-                    policy_1a(dataset, int(id), num_attr+2, 2)
+                for id in wrong_zero_id:
+                    policy_1a(dataset, int(id), num_attr+2, 2 * (1+wrong_zero/zero))
+
+                for id in wrong_one_id:
+                    dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
+
+                # if (score == 0):
+                    # frequency = all_ids.count((id))
+                    # factor = 1 + (1/frequency)
+                    # policy_1a(dataset, int(id), num_attr+2, factor)
 
             accuracy_value = accuracy_score(y_test, prediction)*100
             accuracy_sum += accuracy_value
@@ -258,7 +282,7 @@ while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
 
 policy_sum = 0
 valid = 0
-overall = open("Results/3_Overall.txt", 'a')
+overall = open("Results/Overall.txt", 'a')
 r2_file = open("Results/R2_Overall.txt", 'a')
 acc_inc_file = open("Results/Acc_Increase_Overall.txt", 'a')
 acc_dec_file = open("Results/Acc_Decrease_Overall.txt", 'a')
