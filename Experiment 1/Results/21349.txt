@@ -9,8 +9,8 @@ class length 0 & 1:1663 65
 100.0 %
 100.0 %
 100.0 %
-100.0 %
------99.88405699690819%-----
+99.4186046511628 %
+-----99.82591746202448%-----
 -----------PASS 2-----------
 class length 0 & 1:1 1727
 99.42528735632183 %
@@ -116,7 +116,8 @@ class length 0 & 1:1 1727
 100.0 %
 -----99.94252873563218%-----
 -----------PASS 10-----------
-class length 0 & 1:3 1725
+class length 0 & 1:1 1727
+99.42528735632183 %
 100.0 %
 100.0 %
 100.0 %
@@ -126,10 +127,9 @@ class length 0 & 1:3 1725
 100.0 %
 100.0 %
 100.0 %
-100.0 %
------100.0%-----
-Overall dataset R square: 0.49087985019158054
-Accuracy increase ratio: 0.0
+-----99.94252873563218%-----
+Overall dataset R square: 0.2727272727272728
+Accuracy increase ratio: 0.1111111111111111
 Accuracy decrease ratio: 0.0
-Accuracy equal ratio: 1.0
-Repeatition percentage: 0.9606481481481481
+Accuracy equal ratio: 0.8888888888888888
+Repeatition percentage: 0.9618055555555556

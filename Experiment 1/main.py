@@ -181,7 +181,7 @@ def main(path, sep, is_last, policy_file, r2_file, acc_inc_file, acc_dec_file, a
             all_ids = list(zip(*dataset_now.copy()))[0]
 
             for i, id in enumerate(id_test):
-                pred = prediction[i] # store prediction for this run
+                pred = helper_prediction[i] # store prediction for this run
                 # check for score by matching y label to prediction
                 score = 1 if (pred == dataset[int(id)][1]) else 0
 
@@ -196,7 +196,7 @@ def main(path, sep, is_last, policy_file, r2_file, acc_inc_file, acc_dec_file, a
         y_values.append(iteration_accuracy)
         file.write(f"-----{iteration_accuracy}%-----\n")
         if prev_acc != -1:
-            tolerance = 0.01 #1%
+            tolerance = 0.001 #0.1%
             rise += 1 if ((iteration_accuracy) > (1+tolerance)*(prev_acc)) else 0
             fall += 1 if ((iteration_accuracy) < (1-tolerance)*(prev_acc)) else 0
 
