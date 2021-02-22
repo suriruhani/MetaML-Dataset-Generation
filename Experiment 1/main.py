@@ -223,9 +223,11 @@ def main(path, sep, is_last, policy_file, r2_file, acc_file, rep_file):
     r_squared = correlation_xy**2
     print(r_squared)
 
-    unique_test = dataset_now[0]
+    unique_test = list(zip(*dataset_now.copy()))[0]
     dataset_set = len(np.unique(unique_test))
     rep_percentage = (size - dataset_set)/size
+    print(dataset_set, size)
+    print(rep_percentage)
 
     file.write("Overall dataset R square: " + str(r_squared) + "\n")
     file.write("Accuracy increase ratio: " + str(rise/total_gradient) + "\n")
@@ -248,11 +250,12 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-while len(chosen_datasets) < 100 and len(valid_datasets) > 0:
+test_dataset_count = 100
+while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
-        path = "/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/"+str(valid_datasets[val])+".txt"
-        # path = "/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/"+str(i)+".txt"
+        path = "/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/chosen/"+str(valid_datasets[val])+".txt"
+        # path = "/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/chosen/"+str(i)+".txt"
         dataset = pd.read_csv(path, sep=",", header=None)
     except:
         print("fail")
@@ -279,9 +282,9 @@ rep_file.truncate(0)
 
 for i in chosen_datasets:
     print("NOW TRYING --->", i)
-    dataset_result = main(f"/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
+    dataset_result = main(f"/Users/suriruhani/OneDrive - National University of Singapore/FYP/Meta-learning/Datasets/UCI/chosen/{i}.txt",
                           ",", True, overall, r2_file, acc_file, rep_file)
-    # main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/ECOC/{i}.txt",
+    # main(f"/Volumes/My Passport/[-] Storage/Meta-learning/Datasets/UCI/chosen/{i}.txt",
     #                       ",", True, overall)
 
     if not isnan(dataset_result):
