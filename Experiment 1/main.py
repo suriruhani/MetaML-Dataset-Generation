@@ -189,23 +189,9 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                         pred = prediction[i] # store prediction for this run
                         # check for score by matching y label to prediction
                         score = 1 if (pred == dataset[int(id)][1]) else 0
-                        is_zero = True if dataset[int(id)][1] == 0 else False
-                        if is_zero:
-                            zero += 1
-                            if (score == 0):
-                                wrong_zero += 1
-                                wrong_zero_id.append(id)
-                        else:
-                            one += 1
-                            if (score == 0):
-                                wrong_one += 1
-                                wrong_one_id.append(id)
 
-                        for id in wrong_zero_id:
-                            policy_1a(dataset, int(id), num_attr+2, 2 * (1+wrong_zero/zero))
-
-                        for id in wrong_one_id:
-                            dataset[int(id)][num_attr+2] *= 2 * (1+wrong_one/one)
+                        if score == 0:
+                            policy_1a(dataset, int(id), num_attr+2, 2)
 
                         # if (score == 0):
                             # frequency = all_ids.count((id))
