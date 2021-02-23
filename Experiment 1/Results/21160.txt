@@ -11,44 +11,44 @@ class length 0 & 1:71 35
 -----------Try 3-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:68 38
+class length 0 & 1:63 43
 -----100.0%-----
 -----------Try 4-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:67 39
+class length 0 & 1:53 53
 -----100.0%-----
 -----------Try 5-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:68 38
+class length 0 & 1:52 54
 -----100.0%-----
 -----------Try 6-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:71 35
+class length 0 & 1:52 54
 -----100.0%-----
 -----------Try 7-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:67 39
+class length 0 & 1:52 54
 -----100.0%-----
 -----------Try 8-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:61 45
+class length 0 & 1:52 54
 -----100.0%-----
 -----------Try 9-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:71 35
------99.0%-----
+class length 0 & 1:52 54
+-----100.0%-----
 -----------Try 10-----------
 class length 0 & 1:70 36
 -----100.0%-----
-class length 0 & 1:71 35
+class length 0 & 1:52 54
 -----100.0%-----
-Avg rep sum: 0.35
+Avg rep sum: 0.5009433962264151
 Accuracy increase ratio: 0.0
 Accuracy decrease ratio: 0.0
 Accuracy equal ratio: 1.0
