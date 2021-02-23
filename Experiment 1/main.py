@@ -192,8 +192,8 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                 prediction = model.predict(X_test)
 
                 # knn helper
-                # hepler_model = KNeighborsClassifier(n_neighbors=1)
-                hepler_model = GaussianNB()
+                hepler_model = KNeighborsClassifier(n_neighbors=1)
+                # hepler_model = GaussianNB()
                 hepler_model.fit(X_train, y_train)
                 helper_prediction = hepler_model.predict(X_test)
 
@@ -208,18 +208,13 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
 
                 if round == 0:
                     for i, id in enumerate(id_test):
-                        # pred = helper_prediction[i]
-                        pred = prediction[i] # store prediction for this run
+                        pred = helper_prediction[i]
+                        # pred = prediction[i] # store prediction for this run
                         # check for score by matching y label to prediction
                         score = 1 if (pred == dataset[int(id)][1]) else 0
 
-                        # if score == 0:
-                        #     policy_1a(dataset, int(id), num_attr+2, 2)
-
-                        if (score == 0):
-                            frequency = all_ids.count((id))
-                            factor = 1 + (1/frequency)
-                            policy_1a(dataset, int(id), num_attr+2, factor)
+                        if score == 0:
+                            policy_1a(dataset, int(id), num_attr+2, 2)
 
                 accuracy_value = accuracy_score(y_test, prediction)*100
                 accuracy_sum += accuracy_value
@@ -271,7 +266,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-test_dataset_count = 20
+test_dataset_count = 100
 while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
