@@ -70,6 +70,10 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
             ratio_by_class[0] += 1
     ratio_by_class[1] /= size
     ratio_by_class[0] /= size
+    if ratio_by_class[0] > ratio_by_class[1]:
+        majority_class = 0
+    else:
+        majority_class = 1
 
     rise = fall = 0
     trial_accuracy_change_sum = 0
@@ -102,24 +106,43 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
 
                 current_ratio = [0,0]
                 class_allow = [True, True]
+                ids_added = []
                 while len(dataset_now) < size:
                     roll = random()
                     index = binary_search(weights_total, roll)
-                    class_of_this = dataset[index][1]
-                    current_class_ratio = current_ratio[int(class_of_this)]/len(dataset_now) if current_ratio[int(class_of_this)]!= 0 else 0
-                    idea_class_ratio = 0.5
+                    class_of_this = int(dataset[index][1])
+                    current_class_ratio = current_ratio[int(class_of_this)]/size
+                    ideal_class_ratio = 0.5
                     # ratio of a class lower bounded by original ratio and upper bounded by 50%
-                    if (current_class_ratio <= idea_class_ratio):
-                        dataset_now.append(dataset[index])
-                        current_ratio[int(class_of_this)] += 1
-                    else:
-                        class_allow[int(class_of_this)] = False
-                        break
+                    # print(class_of_this, majority_class)
+                    # print(ratio_by_class[0], ratio_by_class[1])
+                    if class_of_this == majority_class:
 
+                        if (current_class_ratio <= ratio_by_class[class_of_this]):
+                            dataset_now.append(dataset[index])
+                            ids_added.append(int(index))
+                            current_ratio[int(class_of_this)] += 1
+                        else:
+                            class_allow[int(class_of_this)] = False
+                            print("----reached majority class limit")
+                            break
+                    else:
+                        if (current_class_ratio <= ideal_class_ratio):
+                            dataset_now.append(dataset[index])
+                            ids_added.append(int(index))
+                            current_ratio[int(class_of_this)] += 1
+                        else:
+                            class_allow[int(class_of_this)] = False
+                            print("----reached minority class limit")
+                            break
+                print("--size", len(ids_added))
                 while len(dataset_now) < size:
                     roll = random()
                     index = binary_search(weights_of_0, roll) if class_allow[0] else binary_search(weights_of_1, roll)
                     dataset_now.append(class0[index]) if class_allow[0] else dataset_now.append(class1[index])
+                    ids_added.append(int(index))
+
+                print(len(ids_added), ids_added)
 
             # make folds and train, test
             class1 = []
@@ -206,6 +229,11 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
             if round == 0:
                 prev_acc = accuracy_avg
 
+            unique_test = list(zip(*dataset_now.copy()))[0]
+            dataset_set = len(np.unique(unique_test))
+            rep_percentage = (size - dataset_set)/size
+            print(dataset_set, size)
+
         if prev_acc != -1:
             tolerance = 0.05 #5%
             rise += 1 if ((accuracy_avg) > (1+tolerance)*(prev_acc)) else 0
@@ -214,6 +242,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
         unique_test = list(zip(*dataset_now.copy()))[0]
         dataset_set = len(np.unique(unique_test))
         rep_percentage = (size - dataset_set)/size
+        print(dataset_set, size)
         rep_sum += rep_percentage
 
         trial_accuracy_change_sum += (accuracy_value - prev_acc)/prev_acc
@@ -237,8 +266,8 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
     policy_file.write(filename + " : Accuracy change = " + str(avg_trial_acc_change_sum) + " Rise ratio = "
                       + str(rise/total_gradient) + " Unique % " + str(rep_percentage) + "\n")
 
-    print(avg_trial_acc_change_sum)
-    return avg_trial_acc_change_sum
+    print(avg_rep_sum)
+    return avg_rep_sum
 
 chosen_datasets = []
 # datasets with less than 8 classes originally
@@ -247,7 +276,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-test_dataset_count = 30
+test_dataset_count = 1
 while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:

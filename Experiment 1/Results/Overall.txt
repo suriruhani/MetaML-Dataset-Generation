@@ -1,0 +1,1 @@
+21181.txt : Accuracy change = 0.04228359715798253 Rise ratio = 0.5 Unique % 0.33962264150943394
