@@ -185,18 +185,18 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
 
                 if round == 0:
                     for i, id in enumerate(id_test):
-                        pred = helper_prediction[i]
-                        # pred = prediction[i] # store prediction for this run
+                        # pred = helper_prediction[i]
+                        pred = prediction[i] # store prediction for this run
                         # check for score by matching y label to prediction
                         score = 1 if (pred == dataset[int(id)][1]) else 0
 
-                        if score == 0:
-                            policy_1a(dataset, int(id), num_attr+2, 2)
+                        # if score == 0:
+                        #     policy_1a(dataset, int(id), num_attr+2, 2)
 
-                        # if (score == 0):
-                            # frequency = all_ids.count((id))
-                            # factor = 1 + (1/frequency)
-                            # policy_1a(dataset, int(id), num_attr+2, factor)
+                        if (score == 0):
+                            frequency = all_ids.count((id))
+                            factor = 1 + (1/frequency)
+                            policy_1a(dataset, int(id), num_attr+2, factor)
 
                 accuracy_value = accuracy_score(y_test, prediction)*100
                 accuracy_sum += accuracy_value
