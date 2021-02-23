@@ -124,7 +124,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                             current_ratio[int(class_of_this)] += 1
                         else:
                             class_allow[int(class_of_this)] = False
-                            print("----reached majority class limit")
+                            # print("----reached majority class limit")
                             break
                     else:
                         if (current_class_ratio <= ideal_class_ratio):
@@ -133,16 +133,16 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                             current_ratio[int(class_of_this)] += 1
                         else:
                             class_allow[int(class_of_this)] = False
-                            print("----reached minority class limit")
+                            # print("----reached minority class limit")
                             break
-                print("--size", len(ids_added))
+                # print("--size", len(ids_added))
                 while len(dataset_now) < size:
                     roll = random()
                     index = binary_search(weights_of_0, roll) if class_allow[0] else binary_search(weights_of_1, roll)
                     dataset_now.append(class0[index]) if class_allow[0] else dataset_now.append(class1[index])
                     ids_added.append(int(index))
 
-                print(len(ids_added), ids_added)
+                # print(len(ids_added), ids_added)
 
             # make folds and train, test
             class1 = []
@@ -229,11 +229,6 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
             if round == 0:
                 prev_acc = accuracy_avg
 
-            unique_test = list(zip(*dataset_now.copy()))[0]
-            dataset_set = len(np.unique(unique_test))
-            rep_percentage = (size - dataset_set)/size
-            print(dataset_set, size)
-
         if prev_acc != -1:
             tolerance = 0.05 #5%
             rise += 1 if ((accuracy_avg) > (1+tolerance)*(prev_acc)) else 0
@@ -242,7 +237,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
         unique_test = list(zip(*dataset_now.copy()))[0]
         dataset_set = len(np.unique(unique_test))
         rep_percentage = (size - dataset_set)/size
-        print(dataset_set, size)
+        # print(dataset_set, size)
         rep_sum += rep_percentage
 
         trial_accuracy_change_sum += (accuracy_value - prev_acc)/prev_acc
@@ -276,7 +271,7 @@ valid_datasets = (list(range(1,155)) + list(range(20630, 21374)))
                 # + list(range(28533, 28658)))
 
 # choose 100 randomly
-test_dataset_count = 1
+test_dataset_count = 20
 while len(chosen_datasets) < test_dataset_count and len(valid_datasets) > 0:
     val = randint(0,len(valid_datasets)-1)
     try:
