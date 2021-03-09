@@ -194,8 +194,8 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                 prediction = model.predict(X_test)
 
                 # knn helper
-                # hepler_model = KNeighborsClassifier(n_neighbors=1)
-                hepler_model = tree.DecisionTreeClassifier()
+                hepler_model = KNeighborsClassifier(n_neighbors=1)
+                # hepler_model = tree.DecisionTreeClassifier()
                 # hepler_model = GaussianNB()
                 hepler_model.fit(X_train, y_train)
                 helper_prediction = hepler_model.predict(X_test)
@@ -230,7 +230,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                         #     policy_1a(dataset, int(id), num_attr+2, (1+wrong_zero/zero))
                         # for id in wrong_one_id:
                         #     dataset[int(id)][num_attr+2] *= (1+wrong_one/one)
-                        if score == 1:
+                        if score == 0:
                             policy_1a(dataset, int(id), num_attr+2, 2)
 
                 accuracy_value = accuracy_score(y_test, prediction)*100
