@@ -211,7 +211,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
 
                 if round == 0:
                     for i, id in enumerate(id_test):
-                        pred = prediction[i]
+                        pred = helper_prediction[i]
                         # pred = prediction[i] # store prediction for this run
                         # check for score by matching y label to prediction
                         score = 1 if (pred == dataset[int(id)][1]) else 0
@@ -230,7 +230,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                         #     policy_1a(dataset, int(id), num_attr+2, (1+wrong_zero/zero))
                         # for id in wrong_one_id:
                         #     dataset[int(id)][num_attr+2] *= (1+wrong_one/one)
-                        if score == 1:
+                        if score == 0:
                             policy_1a(dataset, int(id), num_attr+2, 2)
 
                 accuracy_value = accuracy_score(y_test, prediction)*100
