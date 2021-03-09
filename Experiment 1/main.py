@@ -229,7 +229,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                         #     policy_1a(dataset, int(id), num_attr+2, (1+wrong_zero/zero))
                         # for id in wrong_one_id:
                         #     dataset[int(id)][num_attr+2] *= (1+wrong_one/one)
-                        if score == 0:
+                        if score == 1:
                             policy_1a(dataset, int(id), num_attr+2, 2)
 
                 accuracy_value = accuracy_score(y_test, prediction)*100
