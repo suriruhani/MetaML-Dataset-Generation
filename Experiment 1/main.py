@@ -187,7 +187,8 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                 X_train = [row[2:num_attr+2] for row in train]
                 y_train = list(zip(*train))[1]
 
-                model = tree.DecisionTreeClassifier()
+                # model = tree.DecisionTreeClassifier()
+                model = KNeighborsClassifier(n_neighbors=1)
                 model = model.fit(X_train, y_train)
                 prediction = model.predict(X_test)
 
@@ -227,7 +228,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
                         #     policy_1a(dataset, int(id), num_attr+2, (1+wrong_zero/zero))
                         # for id in wrong_one_id:
                         #     dataset[int(id)][num_attr+2] *= (1+wrong_one/one)
-                        if score == 1:
+                        if score == 0:
                             policy_1a(dataset, int(id), num_attr+2, 2)
 
                 accuracy_value = accuracy_score(y_test, prediction)*100
