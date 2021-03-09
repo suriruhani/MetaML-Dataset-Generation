@@ -208,7 +208,7 @@ def main(path, sep, is_last, policy_file, acc_file, acc_inc_file, acc_dec_file, 
 
                 if round == 0:
                     for i, id in enumerate(id_test):
-                        pred = helper_prediction[i]
+                        pred = prediction[i]
                         # pred = prediction[i] # store prediction for this run
                         # check for score by matching y label to prediction
                         score = 1 if (pred == dataset[int(id)][1]) else 0
